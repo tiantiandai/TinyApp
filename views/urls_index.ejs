@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>TinyApp</title>
+</head>
+<body>
+    <!-- Add your EJS code here -->
+     <% include ./partials/_header %>
+    <ul>
+    <% for (const key in urls) { %>
+    <li><%= key %>
+    <form method="POST" action="/urls/<%= key %>/delete">
+      <button name="delete" type="submit">Delete</button>
+    </form></li>
+    <li>
+    <%= urls[key]; %> <br/>
+    </li>
+    <% } %>
+    </ul>
+</body>
+</html>
