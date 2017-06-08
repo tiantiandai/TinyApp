@@ -7,13 +7,20 @@ app.set("view engine", "ejs")
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+const cookiesParser = require("cookie-parser");
+app.use(cookiesParser());
+
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  console.log(req.cookies);
+  let templateVars = {
+    username: req.cookies["username"]
+  }
+  res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {
@@ -48,11 +55,18 @@ app.get("/urls", (req, res) => {
                       //vailable in template file
                       // 2nd is the object that has variables that we want
                       //ot use in template)
-  res.render("urls_index", { urls: urlDatabase });
+  let templateVars = {
+    username: req.cookies["username"],
+    urls: urlDatabase
+  };
+  res.render("urls_index", templateVars);
 });
                 // the ":" represents a parameters
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { shortURL: req.params.id, urls: req.body };
+  let templateVars = {
+    username: req.cookies["username"],
+    shortURL: req.params.id,
+    urls: req.body};
   res.render("urls_show", templateVars);
 });
 
@@ -77,6 +91,17 @@ app.post("/urls/:id", (req, res) => {
     console.log(req.body);
     urlDatabase[req.params.id] = req.body.updateURL;
     res.redirect("/urls");
+});
+
+app.post("/login", (req, res) => {
+    console.log(req.body);
+    res.cookie('username',req.body.username);
+    res.redirect('/urls');
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie(req.body.username);
+  res.redirect('/urls');
 });
 
 app.listen(PORT, () => {

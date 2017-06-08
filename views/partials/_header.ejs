@@ -1,2 +1,15 @@
-<h1>Hello</h1>
-<h2>This is tian's Tiny app</h2>
+  <h1>Hello</h1>
+
+  <% if (username){ %>
+
+  <h2>This is <%= username%>'s Tiny app</h2>
+      <button name="logout" type="submit">Logout</button>
+
+  <% } else { %>
+    <form method="POST" action="/login">
+      <input type="text" name="username"><br>
+      <button name="login" type="submit">Submit</button>\
+  </form>
+
+  <% } %>
+
