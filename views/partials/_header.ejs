@@ -1,15 +1,13 @@
   <h1>Hello</h1>
 
-  <% if (username){ %>
 
-  <h2>This is <%= username%>'s Tiny app</h2>
+  <% if (user){ %>
+
+  <h2>This is <%= user.id %>'s Tiny app</h2>
+      <form method="POST" action="/logout">
       <button name="logout" type="submit">Logout</button>
-
-  <% } else { %>
-    <form method="POST" action="/login">
-      <input type="text" name="username"><br>
-      <button name="login" type="submit">Submit</button>\
-  </form>
-
+      </form>
   <% } %>
+
+
 

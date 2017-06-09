@@ -8,13 +8,13 @@
      <% include ./partials/_header %>
     <ul>
     <% for (const key in urls) { %>
-    <li><%= key %>
-    <form method="POST" action="/urls/<%= key %>/delete">
-      <button name="delete" type="submit">Delete</button>
-    </form></li>
-    <li>
-    <%= urls[key]; %> <br/>
-    </li>
+      <li><%= key %>
+      <li>
+      <%= urls[key].longURL; %> <br/>
+      </li>
+      <form method="POST" action="/urls/<%= key %>/delete">
+        <button name="delete" type="submit">Delete</button>
+      </form></li>
     <% } %>
     </ul>
 </body>
