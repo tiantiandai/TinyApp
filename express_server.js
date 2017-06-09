@@ -12,8 +12,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(cookieSession({
   name: 'session',
-  keys: ['zsxdfghjklsdghjklcvbnmsdfghjk'],
-  maxAge: 24 * 60 * 60 * 1000
+  keys: ['zsxdfghjklsdghjklcvbnmsdfghjk']
 }));
 
 
@@ -76,14 +75,8 @@ function urlsForUser(id){
 }
 
 
-function checkIdForUser(userId, shortUrl){
-  var flag = false;
-  for(var short in urlDatabase){
-    if(urlDatabase[short].userID === userId && short === shortUrl) {
-      flag = true;
-    }
-  }
-  return flag;
+function checkIdForUser(userId, shortUrl) {
+  return (urlDatabase[shortUrl] && urlDatabase[shortUrl].userID === userId);
 }
 
 app.get("/urls/new", (req, res) => {
@@ -101,9 +94,12 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const longUrl = req.body.longURL;
-  const shrotUrl = generateRandomString();
-  urlDatabase[shrotUrl] = longUrl;
-  res.redirect('/urls/' + shrotUrl);
+  const shortUrl = generateRandomString();
+  urlDatabase[shortUrl] = {
+    userID: req.session.user_id,
+    longURL: longUrl
+  },
+  res.redirect('/urls/' + shortUrl);
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -131,7 +127,7 @@ app.get("/urls", (req, res) => {
                       // 2nd is the object that has variables that we want
                       //ot use in template)
 
-  if(req.session.user_id){
+  if (req.session.user_id){
 
     let urlsCollection = urlsForUser(req.session.user_id);
 
@@ -150,18 +146,20 @@ app.get("/urls", (req, res) => {
 
 
                 // the ":" represents a parameters
+
 app.get("/urls/:id", (req, res) => {
   var userID = req.session.user_id;
   var shortUrlId = req.params.id;
 
-  if(checkIdForUser(userID, shortUrlId)){
+  if (checkIdForUser(userID, shortUrlId)) {
     let templateVars = {
-    user: req.user,
-    shortURL: req.params.id,
-    longURL: urlDatabase[shortUrlId].longURL};
+      user: userID,
+      shortURL: req.params.id,
+      longURL: urlDatabase[shortUrlId].longURL
+    };
     res.render("urls_show", templateVars);
   }
-  else{
+  else {
     res.send("Your userID does not have the authorization to perform this operation.");
   }
 });
@@ -203,6 +201,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //update a long url
 app.post("/urls/:id", (req, res) => {
+  console.log(req);
   if(req.session[user_id] === req.params.id){
     let userID = req.session[user_id];
     for(var shortURL in urlDatabase){
@@ -222,7 +221,7 @@ app.post("/urls/:id", (req, res) => {
 
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/urls');
 });
 
