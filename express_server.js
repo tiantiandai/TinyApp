@@ -53,7 +53,6 @@ var urlDatabase = {
 
 const addUserToReq = (req, res, next) => {
   let user = users[req.session['user_id']];
-  console.log('add user to req', req.session);
   req.user = user;
   next();
 }
@@ -201,7 +200,6 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //update a long url
 app.post("/urls/:id", (req, res) => {
-  console.log(req);
   if(req.session[user_id] === req.params.id){
     let userID = req.session[user_id];
     for(var shortURL in urlDatabase){
