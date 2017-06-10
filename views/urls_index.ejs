@@ -14,7 +14,13 @@
       </li>
       <form method="POST" action="/urls/<%= key %>/delete">
         <button name="delete" type="submit">Delete</button>
-      </form></li>
+      </form>
+
+      <form method="POST" action="/urls/<%= key %>">
+      <input type="text" name="updateURL">
+      <button name="update" type="submit">Update</button>
+      </form>
+      </li>
     <% } %>
     </ul>
 </body>

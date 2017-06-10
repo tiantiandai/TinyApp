@@ -4,7 +4,12 @@
   <title>TinyApp</title>
 </head>
 <body>
-    <form method="POST" action="/register">
+    <%  if(locals.msg === "empty"){ %>
+    Email and password cannot be empty.
+    <% } if (locals.msg === "repeated email") { %>
+    Email has already been used.
+    <%  } %>
+ <form method="POST" action="/register">
     Email: <input type="email" name="email">
     Password: <input type="password" name="password">
     <button name="Register" type="submit">Register</button>

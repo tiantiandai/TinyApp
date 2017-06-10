@@ -91,6 +91,7 @@ app.get("/urls/new", (req, res) => {
 
 });
 
+
 app.post("/urls", (req, res) => {
   const longUrl = req.body.longURL;
   const shortUrl = generateRandomString();
@@ -102,13 +103,13 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-
   let longURL = req.params.shortURL;
-  res.redirect(urlDatabase[longURL]);
+  res.redirect(urlDatabase[longURL].longURL);
 });
 
+//if user logged IN redirect them to their page else to login page
 app.get("/", (req, res) => {
-  res.end("Hello!");
+  res.redirect("/urls")
 });
 
 app.get("/urls.json", (req, res) => {
@@ -120,12 +121,6 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-                      // render(""name of file contains ejs
-                      //urls is the varialbe that i created and is made a
-                      //vailable in template file
-                      // 2nd is the object that has variables that we want
-                      //ot use in template)
-
   if (req.session.user_id){
 
     let urlsCollection = urlsForUser(req.session.user_id);
@@ -143,24 +138,33 @@ app.get("/urls", (req, res) => {
 
 });
 
-
-                // the ":" represents a parameters
-
 app.get("/urls/:id", (req, res) => {
+  // id is not valid
+  if(!urlDatabase[req.params.id]){
+    res.status(404).render('error_404');
+    return;
+  }
+
+  //user is not logged in
+  if(!req.user){
+    res.status(401).render('error_401');
+    return;
+  }
+
+  //user does not own the id
+  if(urlDatabase[req.params.id].userID !== req.user.id){
+    res.status(403).render('error_403');
+    return;
+  }
   var userID = req.session.user_id;
   var shortUrlId = req.params.id;
 
-  if (checkIdForUser(userID, shortUrlId)) {
     let templateVars = {
       user: userID,
       shortURL: req.params.id,
       longURL: urlDatabase[shortUrlId].longURL
     };
     res.render("urls_show", templateVars);
-  }
-  else {
-    res.send("Your userID does not have the authorization to perform this operation.");
-  }
 });
 
 app.get("/urls/:id/webpage", (req, res) => {
@@ -189,31 +193,49 @@ const find = email => {
 
 // delete a short and long url
 app.post("/urls/:id/delete", (req, res) => {
-  let userID = req.session[user_id]; // get the userId
-  for(var shortURL in urlDatabase){
-    if(urlDatabase[shortURL].userID === userID){
-      delete( urlDatabase[req.params.id] );
-      res.redirect("/urls");
-    }
+// id is not valid
+  if(!urlDatabase[req.params.id]){
+    res.status(404).render('error_404');
+    return;
   }
+
+  //user is not logged in
+  if(!req.user){
+    res.status(401).render('error_401');
+    return;
+  }
+
+  //user does not own the id
+  if(urlDatabase[req.params.id].userID !== req.user.id){
+    res.status(403).render('error_403');
+    return;
+  }
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
 });
 
 //update a long url
 app.post("/urls/:id", (req, res) => {
-  if(req.session[user_id] === req.params.id){
-    let userID = req.session[user_id];
-    for(var shortURL in urlDatabase){
-      if(urlDatabase[shortURL].userID === userID){
-        urlDatabase[req.params.id].longURL = req.body.updateURL;
-        res.redirect("/urls");
-      }
-    }
+
+  if(!urlDatabase[req.params.id]){
+    res.status(404).render('error_404');
+    return;
   }
 
-  else{
-    res.send("Your userID does not have the authorization to perform this operation.");
+  //user is not logged in
+  if(!req.user){
+    res.status(401).render('error_401');
+    return;
   }
 
+  //user does not own the id
+  if(urlDatabase[req.params.id].userID !== req.user.id){
+    res.status(403).render('error_403');
+    return;
+  }
+
+  urlDatabase[req.params.id].longURL = req.body.updateURL;
+  res.redirect("/urls");
 
 });
 
@@ -230,16 +252,18 @@ res.render('urls_register');
 app.post("/register", (req, res) => {
 
   if(req.body.email === "" || req.body.password === ""){
-    return res.status(404).send("Email and Password cannot be empty.");
+    var msg = "empty";
+    return res.render("urls_register", {msg});
   }
 
  if(find(req.body.email)){
-    return res.status(404).send("this email address has already been used");
+    var msg = "repeated email"
+    return res.render("urls_register", {msg});
   }
 
   let userRandomId = generateRandomString();
 
-  const password = req.body.password;// you will probably this from req.params
+  const password = req.body.password;
   const hashed_password = bcrypt.hashSync(password, 10);
 
 
@@ -265,7 +289,8 @@ app.post("/login", (req, res) => {
       return res.redirect('/urls');
     }
   }
-  res.status(403).send("Either email does not exist or password is incorrect.");
+  let msg = "Wrong password or email";
+  res.render("urls_login", {msg});
 });
 
 app.listen(PORT, () => {

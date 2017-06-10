@@ -4,10 +4,16 @@
   <title>TinyApp</title>
 </head>
 <body>
+    <%  if(locals.msg === "Wrong password or email"){ %>
+    Email and password cannot be empty OR you have never been registered with us, and please click on the Register Button.
+    <% } %>
     <form method="POST" action="/login">
     Email: <input type="email" name="email">
     Password: <input type="password" name="password">
     <button name="LogIn" type="submit">LogIn</button>
+    </form>
+    <form method="GET" action="/register">
+    <button name="register" type="submit">Register</button>
     </form>
 </body>
 </html>
